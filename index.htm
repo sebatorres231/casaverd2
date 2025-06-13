@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Custom styles for the body and main container */
+        /* Estilos personalizados para el cuerpo y el contenedor principal */
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f0f2f5;
@@ -25,7 +25,7 @@
         .image-container {
             position: relative;
             width: 100%;
-            /* Aspect ratio based on the uploaded image's dimensions (approx 580/830) */
+            /* Proporción basada en las dimensiones de la imagen del mapa (aprox 580/830) */
             padding-bottom: 69.87%; 
             overflow: hidden;
             border-radius: 10px;
@@ -43,8 +43,8 @@
         }
         .marker {
             position: absolute;
-            width: 24px; /* Slightly smaller to match example */
-            height: 24px; /* Slightly smaller to match example */
+            width: 24px; /* Ligeramente más pequeño para coincidir con el ejemplo */
+            height: 24px; /* Ligeramente más pequeño para coincidir con el ejemplo */
             background-color: #ef4444;
             border: 2px solid white;
             border-radius: 50%;
@@ -65,7 +65,7 @@
             background-color: #dc2626;
         }
         
-        /* Styles for the Pop-up Modal */
+        /* Estilos para la ventana modal emergente */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -137,13 +137,12 @@
 
         <div id="imageContainer" class="image-container">
             <img id="mainImage" 
-                 src="Imagen de WhatsApp 2025-06-12 a las 17.47.07_95294d95.jpg" 
-                 alt="Croquis del Pabellón"
-                 onerror="this.onerror=null; this.src='https://placehold.co/830x580/FEE2E2/B91C1C?text=Error+al+cargar+la+imagen';">
-            <!-- Markers will be injected here by JavaScript -->
+                 src="https://i.imgur.com/s8EXFdz.jpeg" 
+                 alt="Croquis del Pabellón">
+            <!-- Los marcadores se inyectarán aquí mediante JavaScript -->
         </div>
 
-        <!-- Pop-up Modal structure -->
+        <!-- Estructura de la ventana modal -->
         <div id="markerModal" class="modal-overlay">
             <div class="modal-content">
                 <button class="close-button" onclick="window.App.closeMarkerModal()">&times;</button>
@@ -154,18 +153,18 @@
         </div>
     </div>
     
-    <!-- Section for the list of interest points -->
+    <!-- Sección para la lista de puntos de interés -->
     <div class="container p-6 md:p-8 mt-8">
         <h2 class="text-2xl font-bold text-gray-800 mb-6">Puntos de Interés</h2>
         <div id="interestPointsList" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Interest points will be injected here by JavaScript -->
+            <!-- Los puntos de interés se inyectarán aquí mediante JavaScript -->
         </div>
     </div>
 
     <script type="module">
-        // Encapsulate app logic in a single global object.
+        // Encapsular la lógica de la aplicación en un objeto global.
         window.App = {
-            // Static, predefined markers based on the final image.
+            // Marcadores estáticos predefinidos basados en la imagen final.
             markers: [
                 { id: 'marker-1', x: 6, y: 56, title: '1. Puerta de Entrada', description: 'Una de las entradas a casa verde, es una de las puertas con las estructuras más antiguas del edificio, y en su cercanía está el centro de estudiantes que anteriormente era la fotocopiadora del establecimiento.', imageData: 'https://i.imgur.com/xv089XI.jpeg' },
                 { id: 'marker-2', x: 92, y: 41, title: '2. Puerta Principal', description: 'Acceso principal al pabellón.', imageData: 'https://i.imgur.com/EdVkbap.jpeg' },
@@ -180,7 +179,7 @@
             ],
 
             init() {
-                // Get DOM elements
+                // Obtener elementos del DOM
                 this.imageContainer = document.getElementById('imageContainer');
                 this.mainImage = document.getElementById('mainImage');
                 this.markerModal = document.getElementById('markerModal');
@@ -189,10 +188,10 @@
                 this.modalDescription = document.getElementById('modalDescription');
                 this.interestPointsList = document.getElementById('interestPointsList');
 
-                // Attach event listeners for the modal
+                // Adjuntar escuchadores de eventos para la modal
                 this.addEventListeners();
 
-                // Render markers and the list once the main image is loaded.
+                // Renderizar marcadores y la lista una vez que la imagen principal se haya cargado.
                 if (this.mainImage.complete) {
                     this.renderAll();
                 } else {
@@ -206,11 +205,11 @@
             },
 
             addEventListeners() {
-                // Close modal when clicking on the overlay
+                // Cerrar la modal al hacer clic en el fondo
                 this.markerModal.addEventListener('click', (e) => {
                     if (e.target === this.markerModal) this.closeMarkerModal();
                 });
-                // Close modal on 'Escape' key press
+                // Cerrar la modal con la tecla 'Escape'
                 document.addEventListener('keydown', (e) => {
                     if (e.key === 'Escape' && this.markerModal.classList.contains('open')) {
                         this.closeMarkerModal();
@@ -228,7 +227,7 @@
                     marker.style.top = `${markerData.y}%`;
                     marker.textContent = (index + 1).toString();
                     
-                    // Add click listener to open the modal with this marker's data
+                    // Añadir evento de clic para abrir la modal con los datos de este marcador
                     marker.addEventListener('click', () => {
                         this.showMarkerModal(markerData);
                     });
@@ -238,7 +237,7 @@
             },
 
             renderInterestPointsList() {
-                this.interestPointsList.innerHTML = ''; // Clear previous list
+                this.interestPointsList.innerHTML = ''; // Limpiar lista anterior
                 this.markers.forEach(markerData => {
                     const pointElement = document.createElement('div');
                     pointElement.className = 'bg-white rounded-lg shadow-md overflow-hidden';
@@ -261,7 +260,7 @@
             },
 
             showMarkerModal(data) {
-                // Populate modal with marker data
+                // Rellenar la modal con los datos del marcador
                 this.modalTitle.textContent = data.title;
                 this.modalDescription.textContent = data.description;
                 
@@ -273,7 +272,7 @@
                     this.modalImage.classList.add('hidden');
                 }
 
-                // Show the modal
+                // Mostrar la modal
                 this.markerModal.classList.add('open');
             },
 
@@ -282,7 +281,7 @@
             }
         };
         
-        // Initialize the app logic once the DOM is ready.
+        // Inicializar la lógica de la aplicación una vez que el DOM esté listo.
         document.addEventListener('DOMContentLoaded', () => window.App.init());
     </script>
 </body>
