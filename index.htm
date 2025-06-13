@@ -14,22 +14,13 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f0f2f5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
         }
         .container {
             background-color: #ffffff;
             border-radius: 15px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            padding: 20px;
             max-width: 900px;
-            width: 100%;
-            overflow: hidden;
-            position: relative;
+            margin: 20px auto;
         }
         .image-container {
             position: relative;
@@ -135,7 +126,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+<body class="bg-gray-100">
     <div class="container p-6 md:p-8">
         <h1 class="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-2">
             Croquis Interactivo del Pabellón
@@ -162,22 +153,30 @@
             </div>
         </div>
     </div>
+    
+    <!-- Section for the list of interest points -->
+    <div class="container p-6 md:p-8 mt-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Puntos de Interés</h2>
+        <div id="interestPointsList" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Interest points will be injected here by JavaScript -->
+        </div>
+    </div>
 
     <script type="module">
         // Encapsulate app logic in a single global object.
         window.App = {
             // Static, predefined markers based on the final image.
             markers: [
-                { id: 'marker-1', x: 6, y: 56, title: '1. Puerta de Entrada', description: 'Una de las entradas a casa verde, es una de las puertas con las estructuras más antiguas del edificio, y en su cercanía está el centro de estudiantes que anteriormente era la fotocopiadora del establecimiento.', imageData: 'image_b888b2.png' },
-                { id: 'marker-2', x: 92, y: 41, title: '2. Puerta Principal', description: 'Acceso principal al pabellón.', imageData: 'image_b83639.png' },
-                { id: 'marker-3', x: 41, y: 57, title: '3. Techo', description: 'El techo de casa verde es una de las estructuras que se fueron manteniendo a lo largo de los años, anteriormente era una especie de patio interno.', imageData: 'image_b8359e.png' },
-                { id: 'marker-4', x: 52, y: 44, title: '4. Segunda Escalera', description: 'Esta escalera remarca la innovación inclusiva de baldosas con relieve.', imageData: 'image_b83217.png' },
-                { id: 'marker-5', x: 48, y: 48, title: '5. Tercera Entrada', description: 'Otra de las entradas secundarias al pabellón.', imageData: 'image_b8319d.png' },
-                { id: 'marker-6', x: 44, y: 57, title: '6. Cartelera', description: 'Antes se podían ver las notas desde este tipo de mobiliarios.', imageData: 'image_b82e96.png' },
-                { id: 'marker-7', x: 18, y: 65, title: '7. Placa Conmemorativa', description: 'Una placa de bronce, unos de los objetos más antiguos del edificio y de los más respetados, conmemora a los desaparecidos de la dictadura militar.', imageData: 'image_b82d9d.png' },
-                { id: 'marker-8', x: 65, y: 47, title: '8. Corredores', description: 'Corredores cercanos a las aulas de planta baja.', imageData: 'image_b82adc.png' },
-                { id: 'marker-9', x: 30, y: 78, title: '9. Secretaría de Extensión', description: 'La Secretaría se encuentra donde antes funcionaba el Aula 1 de Casa Verde.', imageData: 'image_b82abd.png' },
-                { id: 'marker-10', x: 48, y: 68, title: '10. Vestigios en el piso', description: 'Vestigios de las modificaciones y ampliaciones que sufrió casa verde a lo largo de los años.', imageData: 'image_b82a9c.png' },
+                { id: 'marker-1', x: 6, y: 56, title: '1. Puerta de Entrada', description: 'Una de las entradas a casa verde, es una de las puertas con las estructuras más antiguas del edificio, y en su cercanía está el centro de estudiantes que anteriormente era la fotocopiadora del establecimiento.', imageData: 'https://i.imgur.com/xv089XI.jpeg' },
+                { id: 'marker-2', x: 92, y: 41, title: '2. Puerta Principal', description: 'Acceso principal al pabellón.', imageData: 'https://i.imgur.com/EdVkbap.jpeg' },
+                { id: 'marker-3', x: 41, y: 57, title: '3. Techo', description: 'El techo de casa verde es una de las estructuras que se fueron manteniendo a lo largo de los años, anteriormente era una especie de patio interno.', imageData: 'https://i.imgur.com/g36h9pe.jpeg' },
+                { id: 'marker-4', x: 52, y: 44, title: '4. Segunda Escalera', description: 'Esta escalera remarca la innovación inclusiva de baldosas con relieve.', imageData: 'https://i.imgur.com/9Hhlnkg.jpeg' },
+                { id: 'marker-5', x: 48, y: 48, title: '5. Tercera Entrada', description: 'Otra de las entradas secundarias al pabellón.', imageData: 'https://i.imgur.com/hAodsAz.jpeg' },
+                { id: 'marker-6', x: 44, y: 57, title: '6. Cartelera', description: 'Antes se podían ver las notas desde este tipo de mobiliarios.', imageData: 'https://i.imgur.com/TGYQ4K0.jpeg' },
+                { id: 'marker-7', x: 18, y: 65, title: '7. Placa Conmemorativa', description: 'Una placa de bronce, unos de los objetos más antiguos del edificio y de los más respetados, conmemora a los desaparecidos de la dictadura militar.', imageData: 'https://i.imgur.com/X0s9OCK.jpeg' },
+                { id: 'marker-8', x: 65, y: 47, title: '8. Corredores', description: 'Corredores cercanos a las aulas de planta baja.', imageData: 'https://i.imgur.com/bgGeAN6.jpeg' },
+                { id: 'marker-9', x: 30, y: 78, title: '9. Secretaría de Extensión', description: 'La Secretaría se encuentra donde antes funcionaba el Aula 1 de Casa Verde.', imageData: 'https://i.imgur.com/QdNTeEd.jpeg' },
+                { id: 'marker-10', x: 48, y: 68, title: '10. Vestigios en el piso', description: 'Vestigios de las modificaciones y ampliaciones que sufrió casa verde a lo largo de los años.', imageData: 'https://i.imgur.com/TxcOiVH.jpeg' },
             ],
 
             init() {
@@ -188,16 +187,22 @@
                 this.modalTitle = document.getElementById('modalTitle');
                 this.modalImage = document.getElementById('modalImage');
                 this.modalDescription = document.getElementById('modalDescription');
+                this.interestPointsList = document.getElementById('interestPointsList');
 
                 // Attach event listeners for the modal
                 this.addEventListeners();
 
-                // Render markers once the main image is loaded.
+                // Render markers and the list once the main image is loaded.
                 if (this.mainImage.complete) {
-                    this.renderMarkers();
+                    this.renderAll();
                 } else {
-                    this.mainImage.onload = () => this.renderMarkers();
+                    this.mainImage.onload = () => this.renderAll();
                 }
+            },
+            
+            renderAll() {
+                this.renderMarkers();
+                this.renderInterestPointsList();
             },
 
             addEventListeners() {
@@ -232,6 +237,29 @@
                 });
             },
 
+            renderInterestPointsList() {
+                this.interestPointsList.innerHTML = ''; // Clear previous list
+                this.markers.forEach(markerData => {
+                    const pointElement = document.createElement('div');
+                    pointElement.className = 'bg-white rounded-lg shadow-md overflow-hidden';
+
+                    let imageHtml = '';
+                    if (markerData.imageData) {
+                        imageHtml = `<img src="${markerData.imageData}" alt="${markerData.title}" class="w-full h-48 object-cover" onerror="this.onerror=null; this.src='https://placehold.co/600x400/ccc/999?text=Imagen+no+disponible'">`;
+                    }
+                    
+                    pointElement.innerHTML = `
+                        ${imageHtml}
+                        <div class="p-4">
+                            <h3 class="font-bold text-lg mb-2">${markerData.title}</h3>
+                            <p class="text-gray-700 text-sm">${markerData.description}</p>
+                        </div>
+                    `;
+                    
+                    this.interestPointsList.appendChild(pointElement);
+                });
+            },
+
             showMarkerModal(data) {
                 // Populate modal with marker data
                 this.modalTitle.textContent = data.title;
@@ -259,3 +287,4 @@
     </script>
 </body>
 </html>
+
