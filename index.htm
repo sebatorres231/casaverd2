@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Croquis Interactivo del Pabellón Casa Verde (En Blanco)</title>
+    <title>Croquis Interactivo del Pabellón Casa Verde</title>
     <!-- Carga Tailwind CSS para un estilo rápido y responsivo -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,7 +34,8 @@
         .image-container {
             position: relative;
             width: 100%;
-            padding-bottom: 62.5%; /* Maintains a 800x500 aspect ratio (500/800 * 100%) */
+            /* Aspect ratio based on the uploaded image's dimensions (approx 580/830) */
+            padding-bottom: 69.87%; 
             overflow: hidden;
             border-radius: 10px;
             box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
@@ -51,8 +52,8 @@
         }
         .marker {
             position: absolute;
-            width: 28px;
-            height: 28px;
+            width: 24px; /* Slightly smaller to match example */
+            height: 24px; /* Slightly smaller to match example */
             background-color: #ef4444;
             border: 2px solid white;
             border-radius: 50%;
@@ -62,23 +63,17 @@
             align-items: center;
             font-weight: bold;
             color: white;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-            transition: transform 0.1s ease-in-out, background-color 0.2s;
+            transition: transform 0.2s ease-in-out, background-color 0.2s;
             transform: translate(-50%, -50%);
             user-select: none;
         }
         .marker:hover {
-            transform: translate(-50%, -50%) scale(1.1);
+            transform: translate(-50%, -50%) scale(1.15);
             background-color: #dc2626;
         }
-        .marker.editing {
-            cursor: grab;
-        }
-        .marker.editing:active {
-            cursor: grabbing;
-        }
-
+        
         /* Styles for the Pop-up Modal */
         .modal-overlay {
             position: fixed;
@@ -138,298 +133,66 @@
         .close-button:hover {
             color: #333;
         }
-
-        /* Styles for the Custom Confirmation Pop-up */
-        .confirm-modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1001;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
-        }
-        .confirm-modal-overlay.open {
-            opacity: 1;
-            visibility: visible;
-        }
-        .confirm-modal-content {
-            background-color: #ffffff;
-            border-radius: 15px;
-            padding: 25px;
-            max-width: 400px;
-            text-align: center;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-            transform: translateY(20px);
-            opacity: 0;
-            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-        }
-        .confirm-modal-overlay.open .confirm-modal-content {
-            transform: translateY(0);
-            opacity: 1;
-        }
-        .confirm-modal-content button {
-            margin: 0 10px;
-            padding: 10px 20px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.2s ease-in-out, transform 0.1s;
-        }
-        .confirm-modal-content button:hover {
-            transform: translateY(-2px);
-        }
-        .confirm-modal-content .btn-confirm {
-            background-color: #ef4444;
-            color: white;
-        }
-        .confirm-modal-content .btn-confirm:hover {
-            background-color: #dc2626;
-        }
-        .confirm-modal-content .btn-cancel {
-            background-color: #e5e7eb;
-            color: #374151;
-        }
-        .confirm-modal-content .btn-cancel:hover {
-            background-color: #d1d5db;
-        }
     </style>
-    <!-- Firebase SDKs -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Global variables for Firebase services
-        let db, auth;
-        let isAuthReady = false; // Flag to indicate if Firebase auth is ready
-
-        // Mandatory global variables provided by Canvas environment
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfigStr = typeof __firebase_config !== 'undefined' ? __firebase_config : '{}';
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-        // Initialize Firebase and set up authentication
-        async function initializeFirebase() {
-            // Wait for the App object to be available
-            await new Promise(resolve => {
-                const interval = setInterval(() => {
-                    if (window.App) {
-                        clearInterval(interval);
-                        resolve();
-                    }
-                }, 50);
-            });
-
-            if (firebaseConfigStr === '{}') {
-                console.error("Firebase config is missing. Cannot initialize Firebase.");
-                // Fallback to allow UI to function without persistence
-                window.App.userId = crypto.randomUUID();
-                document.getElementById('userIdDisplay').textContent = `Local (sin conexión)`;
-                window.renderMarkers();
-                return;
-            }
-            const firebaseConfig = JSON.parse(firebaseConfigStr);
-            const app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
-
-            // Listen for authentication state changes
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    window.App.userId = user.uid;
-                    isAuthReady = true;
-                    console.log("Firebase Auth ready. User ID:", window.App.userId);
-                    document.getElementById('userIdDisplay').textContent = window.App.userId;
-                    await loadMarkers(); // Load markers once authenticated
-                } else {
-                    try {
-                        if (initialAuthToken) {
-                            await signInWithCustomToken(auth, initialAuthToken);
-                        } else {
-                            await signInAnonymously(auth);
-                        }
-                    } catch (error) {
-                        console.error("Error signing in:", error);
-                        isAuthReady = false; // Auth failed
-                        window.App.userId = crypto.randomUUID(); // Fallback to a random ID
-                        document.getElementById('userIdDisplay').textContent = `Local (error de conexión)`;
-                        console.warn("Signed in anonymously failed, using random UUID as user ID:", window.App.userId);
-                        window.App.currentMarkers = [];
-                        window.renderMarkers(); 
-                    }
-                }
-            });
-        }
-
-        // --- Firestore Operations ---
-
-        /**
-         * Saves the current markers data to Firestore.
-         */
-        window.saveMarkers = async (markers) => {
-            if (!isAuthReady || !db || !window.App.userId) {
-                console.warn("Firebase not ready or user not authenticated. Cannot save markers.");
-                return;
-            }
-            try {
-                const docRef = doc(db, `/artifacts/${appId}/users/${window.App.userId}/markers`, 'user_markers');
-                await setDoc(docRef, { markers: markers });
-                console.log("Marcadores guardados en Firestore.");
-            } catch (error) {
-                console.error("Error al guardar marcadores en Firestore:", error);
-            }
-        };
-
-        /**
-         * Loads markers data from Firestore using a real-time listener.
-         */
-        async function loadMarkers() {
-            if (!isAuthReady || !db || !window.App.userId) {
-                console.warn("Firebase not ready or user not authenticated. Cannot load markers.");
-                window.App.currentMarkers = [];
-                window.renderMarkers();
-                return;
-            }
-            try {
-                const docRef = doc(db, `/artifacts/${appId}/users/${window.App.userId}/markers`, 'user_markers');
-                onSnapshot(docRef, (docSnap) => {
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        window.App.currentMarkers = data.markers || [];
-                        console.log("Marcadores cargados desde Firestore (en tiempo real):", window.App.currentMarkers);
-                    } else {
-                        console.log("No hay marcadores guardados en Firestore. Comenzando con un lienzo en blanco.");
-                        window.App.currentMarkers = []; // Start with an empty array if no data
-                    }
-                    window.renderMarkers(); // Render markers after loading/updating
-                });
-            } catch (error) {
-                console.error("Error al cargar marcadores desde Firestore:", error);
-                window.App.currentMarkers = []; // Fallback to empty on error
-                window.renderMarkers();
-            }
-        }
-
-        initializeFirebase();
-    </script>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
     <div class="container p-6 md:p-8">
         <h1 class="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-2">
             Croquis Interactivo del Pabellón
         </h1>
-        <p class="text-center text-gray-600 mb-4">
-            Haz clic en los marcadores para ver detalles. Activa el "Modo Edición" para moverlos, eliminarlos o añadir nuevos.
+        <p class="text-center text-gray-600 mb-6">
+            Haz clic en los marcadores para ver más detalles sobre cada punto de interés.
         </p>
 
-        <div class="flex flex-col sm:flex-row justify-center items-center gap-4 mb-6">
-            <button id="toggleEditModeBtn" class="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75">
-                Activar Modo Edición
-            </button>
-            <button id="addMarkerBtn" class="w-full sm:w-auto px-6 py-3 bg-purple-600 text-white font-semibold rounded-lg shadow-md hover:bg-purple-700 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-75 hidden">
-                Añadir Nuevo Marcador
-            </button>
-        </div>
-
         <div id="imageContainer" class="image-container">
-            <!-- The main croquis image. Replaced local file with a placeholder. -->
             <img id="mainImage" 
-                 src="Imagen de WhatsApp 2025-06-12 a las 17.47.07_95294d95.jpg" 
+                 src="image_b89efc.png" 
                  alt="Croquis del Pabellón"
-                 onerror="this.onerror=null; this.src='https://placehold.co/800x500/FEE2E2/B91C1C?text=Error+al+cargar+la+imagen';">
+                 onerror="this.onerror=null; this.src='https://placehold.co/830x580/FEE2E2/B91C1C?text=Error+al+cargar+la+imagen';">
             <!-- Markers will be injected here by JavaScript -->
         </div>
-         <p class="text-center text-xs mt-2 text-gray-500">ID de Sesión: <span id="userIdDisplay">Cargando...</span></p>
 
-        <!-- Pop-up Modal structure (for viewing/editing markers) -->
+        <!-- Pop-up Modal structure -->
         <div id="markerModal" class="modal-overlay">
             <div class="modal-content">
                 <button class="close-button" onclick="window.App.closeMarkerModal()">&times;</button>
-                <div id="viewFields">
-                  <h3 id="modalTitle" class="text-xl font-bold text-gray-800 mb-2"></h3>
-                  <img id="modalImage" src="" alt="Foto del lugar" class="w-full hidden">
-                  <p id="modalDescription" class="text-gray-700 text-sm mt-4"></p>
-                </div>
-
-                <!-- Edit fields (only visible in edit mode) -->
-                <div id="editFields" class="mt-4 p-4 border rounded-lg bg-gray-50 hidden">
-                    <h4 class="font-semibold text-lg mb-2">Editar Marcador</h4>
-                    <div class="mb-3">
-                        <label for="editTitle" class="block text-sm font-medium text-gray-700">Título:</label>
-                        <input type="text" id="editTitle" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2">
-                    </div>
-                    <div class="mb-3">
-                        <label for="editDescription" class="block text-sm font-medium text-gray-700">Descripción:</label>
-                        <textarea id="editDescription" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2"></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label for="editImage" class="block text-sm font-medium text-gray-700">Subir Imagen (JPG/PNG):</label>
-                        <input type="file" id="editImage" accept="image/jpeg,image/png" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                        <img id="editImagePreview" src="" alt="Previsualización de imagen" class="mt-2 w-full max-h-48 object-contain rounded-md hidden">
-                        <p class="text-xs text-gray-500 mt-1">Sugerencia: Imágenes pequeñas (&lt;1MB) funcionan mejor.</p>
-                    </div>
-                    <button id="saveChangesBtn" class="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-200">Guardar Cambios</button>
-                    <button id="deleteMarkerBtn" class="w-full mt-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-200">Eliminar Marcador</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Custom Confirmation Pop-up -->
-        <div id="confirmModal" class="confirm-modal-overlay">
-            <div class="confirm-modal-content">
-                <p id="confirmMessage" class="text-lg font-semibold text-gray-800 mb-4"></p>
-                <div class="flex justify-center">
-                    <button id="confirmBtn" class="btn-confirm">Sí</button>
-                    <button id="cancelBtn" class="btn-cancel">Cancelar</button>
-                </div>
+                <h3 id="modalTitle" class="text-xl font-bold text-gray-800 mb-2"></h3>
+                <img id="modalImage" src="" alt="Foto del lugar" class="w-full hidden">
+                <p id="modalDescription" class="text-gray-700 text-sm mt-4"></p>
             </div>
         </div>
     </div>
 
     <script type="module">
-        // Encapsulate app logic in a single global object to avoid polluting the window scope.
+        // Encapsulate app logic in a single global object.
         window.App = {
-            userId: null,
-            isEditMode: false,
-            draggedMarker: null,
-            currentMarkerIdBeingEdited: null,
-            currentMarkers: [], // Centralized marker data
+            // Static, predefined markers based on the final image.
+            markers: [
+                { id: 'marker-1', x: 6, y: 56, title: '1. Puerta de Entrada', description: 'Una de las entradas a casa verde, es una de las puertas con las estructuras más antiguas del edificio, y en su cercanía está el centro de estudiantes que anteriormente era la fotocopiadora del establecimiento.', imageData: 'image_b888b2.png' },
+                { id: 'marker-2', x: 92, y: 41, title: '2. Puerta Principal', description: 'Acceso principal al pabellón.', imageData: 'image_b83639.png' },
+                { id: 'marker-3', x: 41, y: 57, title: '3. Techo', description: 'El techo de casa verde es una de las estructuras que se fueron manteniendo a lo largo de los años, anteriormente era una especie de patio interno.', imageData: 'image_b8359e.png' },
+                { id: 'marker-4', x: 52, y: 44, title: '4. Segunda Escalera', description: 'Esta escalera remarca la innovación inclusiva de baldosas con relieve.', imageData: 'image_b83217.png' },
+                { id: 'marker-5', x: 48, y: 48, title: '5. Tercera Entrada', description: 'Otra de las entradas secundarias al pabellón.', imageData: 'image_b8319d.png' },
+                { id: 'marker-6', x: 44, y: 57, title: '6. Cartelera', description: 'Antes se podían ver las notas desde este tipo de mobiliarios.', imageData: 'image_b82e96.png' },
+                { id: 'marker-7', x: 18, y: 65, title: '7. Placa Conmemorativa', description: 'Una placa de bronce, unos de los objetos más antiguos del edificio y de los más respetados, conmemora a los desaparecidos de la dictadura militar.', imageData: 'image_b82d9d.png' },
+                { id: 'marker-8', x: 65, y: 47, title: '8. Corredores', description: 'Corredores cercanos a las aulas de planta baja.', imageData: 'image_b82adc.png' },
+                { id: 'marker-9', x: 30, y: 78, title: '9. Secretaría de Extensión', description: 'La Secretaría se encuentra donde antes funcionaba el Aula 1 de Casa Verde.', imageData: 'image_b82abd.png' },
+                { id: 'marker-10', x: 48, y: 68, title: '10. Vestigios en el piso', description: 'Vestigios de las modificaciones y ampliaciones que sufrió casa verde a lo largo de los años.', imageData: 'image_b82a9c.png' },
+            ],
 
             init() {
                 // Get DOM elements
-                this.toggleEditModeBtn = document.getElementById('toggleEditModeBtn');
-                this.addMarkerBtn = document.getElementById('addMarkerBtn');
                 this.imageContainer = document.getElementById('imageContainer');
                 this.mainImage = document.getElementById('mainImage');
                 this.markerModal = document.getElementById('markerModal');
                 this.modalTitle = document.getElementById('modalTitle');
                 this.modalImage = document.getElementById('modalImage');
                 this.modalDescription = document.getElementById('modalDescription');
-                this.editFields = document.getElementById('editFields');
-                this.viewFields = document.getElementById('viewFields');
-                this.editTitle = document.getElementById('editTitle');
-                this.editDescription = document.getElementById('editDescription');
-                this.editImage = document.getElementById('editImage');
-                this.editImagePreview = document.getElementById('editImagePreview');
-                this.saveChangesBtn = document.getElementById('saveChangesBtn');
-                this.deleteMarkerBtn = document.getElementById('deleteMarkerBtn');
-                this.confirmModal = document.getElementById('confirmModal');
-                this.confirmMessage = document.getElementById('confirmMessage');
-                this.confirmBtn = document.getElementById('confirmBtn');
-                this.cancelBtn = document.getElementById('cancelBtn');
 
-                // Attach event listeners
+                // Attach event listeners for the modal
                 this.addEventListeners();
 
-                // Ensure the main image loads before rendering markers
+                // Render markers once the main image is loaded.
                 if (this.mainImage.complete) {
                     this.renderMarkers();
                 } else {
@@ -438,238 +201,61 @@
             },
 
             addEventListeners() {
-                this.toggleEditModeBtn.addEventListener('click', () => this.toggleEditMode());
-                this.addMarkerBtn.addEventListener('click', () => this.addMarker());
-                this.saveChangesBtn.addEventListener('click', () => this.saveChanges());
-                this.deleteMarkerBtn.addEventListener('click', () => this.confirmDelete());
-                this.editImage.addEventListener('change', (e) => this.handleImageUpload(e));
-
-                // Drag and drop listeners
-                document.addEventListener('mousemove', (e) => this.dragMarker(e));
-                document.addEventListener('mouseup', () => this.dropMarker());
-                document.addEventListener('touchmove', (e) => this.dragMarker(e.touches[0]));
-                document.addEventListener('touchend', () => this.dropMarker());
-
-
-                // Modal close listeners
+                // Close modal when clicking on the overlay
                 this.markerModal.addEventListener('click', (e) => {
                     if (e.target === this.markerModal) this.closeMarkerModal();
                 });
-                this.confirmModal.addEventListener('click', (e) => {
-                    if (e.target === this.confirmModal) this.closeConfirmModal();
-                });
+                // Close modal on 'Escape' key press
                 document.addEventListener('keydown', (e) => {
-                    if (e.key === 'Escape') {
-                        if (this.markerModal.classList.contains('open')) this.closeMarkerModal();
-                        if (this.confirmModal.classList.contains('open')) this.closeConfirmModal();
+                    if (e.key === 'Escape' && this.markerModal.classList.contains('open')) {
+                        this.closeMarkerModal();
                     }
                 });
             },
 
             renderMarkers() {
                 this.imageContainer.querySelectorAll('.marker').forEach(m => m.remove());
-                // Use this.currentMarkers which is guaranteed to be an array
-                this.currentMarkers.forEach((markerData, index) => {
+                
+                this.markers.forEach((markerData, index) => {
                     const marker = document.createElement('div');
                     marker.className = 'marker';
                     marker.style.left = `${markerData.x}%`;
                     marker.style.top = `${markerData.y}%`;
-                    // Change the content to be the number (index + 1)
                     marker.textContent = (index + 1).toString();
-                    marker.setAttribute('data-id', markerData.id);
-
-                    if (this.isEditMode) marker.classList.add('editing');
-
-                    // Event listeners for marker interaction
-                    const startDrag = (e) => {
-                         if (this.isEditMode) {
-                            e.preventDefault();
-                            this.draggedMarker = marker;
-                         }
-                    };
-
-                    marker.addEventListener('mousedown', startDrag);
-                    marker.addEventListener('touchstart', startDrag);
-
+                    
+                    // Add click listener to open the modal with this marker's data
                     marker.addEventListener('click', () => {
-                        // This timeout helps differentiate a click from the end of a drag
-                        setTimeout(() => {
-                           if (!this.draggedMarker) {
-                             this.currentMarkerIdBeingEdited = markerData.id;
-                             this.showMarkerModal(markerData);
-                           }
-                        }, 50);
+                        this.showMarkerModal(markerData);
                     });
                     
                     this.imageContainer.appendChild(marker);
                 });
             },
 
-            toggleEditMode() {
-                this.isEditMode = !this.isEditMode;
-                this.toggleEditModeBtn.textContent = this.isEditMode ? 'Desactivar Modo Edición' : 'Activar Modo Edición';
-                this.toggleEditModeBtn.classList.toggle('bg-blue-600', !this.isEditMode);
-                this.toggleEditModeBtn.classList.toggle('hover:bg-blue-700', !this.isEditMode);
-                this.toggleEditModeBtn.classList.toggle('bg-red-600', this.isEditMode);
-                this.toggleEditModeBtn.classList.toggle('hover:bg-red-700', this.isEditMode);
-                this.addMarkerBtn.classList.toggle('hidden', !this.isEditMode);
-                this.renderMarkers();
-            },
-
-            addMarker() {
-                if (!this.isEditMode) return;
-                const newMarker = {
-                    id: `marker-${Date.now()}`,
-                    x: 50, y: 50,
-                    title: 'Nuevo Marcador',
-                    description: 'Edita la descripción aquí.',
-                    imageData: ''
-                };
-                this.currentMarkers.push(newMarker);
-                window.saveMarkers(this.currentMarkers);
-                this.currentMarkerIdBeingEdited = newMarker.id;
-                this.showMarkerModal(newMarker);
-            },
-
-            dragMarker(e) {
-                if (!this.draggedMarker || !this.isEditMode) return;
-                e.preventDefault();
-                const containerRect = this.imageContainer.getBoundingClientRect();
-                let clientX = e.clientX;
-                let clientY = e.clientY;
-                if(e.touches) {
-                    clientX = e.touches[0].clientX;
-                    clientY = e.touches[0].clientY;
-                }
-
-                let newX = ((clientX - containerRect.left) / containerRect.width) * 100;
-                let newY = ((clientY - containerRect.top) / containerRect.height) * 100;
-                newX = Math.max(0, Math.min(100, newX));
-                newY = Math.max(0, Math.min(100, newY));
-                this.draggedMarker.style.left = `${newX}%`;
-                this.draggedMarker.style.top = `${newY}%`;
-            },
-
-            dropMarker() {
-                if (!this.draggedMarker || !this.isEditMode) return;
-                const markerId = this.draggedMarker.getAttribute('data-id');
-                const markerIndex = this.currentMarkers.findIndex(m => m.id === markerId);
-                if (markerIndex !== -1) {
-                    this.currentMarkers[markerIndex].x = parseFloat(this.draggedMarker.style.left);
-                    this.currentMarkers[markerIndex].y = parseFloat(this.draggedMarker.style.top);
-                    window.saveMarkers(this.currentMarkers);
-                }
-                // Use a timeout to nullify draggedMarker to distinguish from a click
-                setTimeout(() => {
-                    this.draggedMarker = null;
-                }, 50);
-            },
-
             showMarkerModal(data) {
+                // Populate modal with marker data
                 this.modalTitle.textContent = data.title;
                 this.modalDescription.textContent = data.description;
+                
                 if (data.imageData) {
                     this.modalImage.src = data.imageData;
+                    this.modalImage.alt = `Foto de ${data.title}`;
                     this.modalImage.classList.remove('hidden');
                 } else {
                     this.modalImage.classList.add('hidden');
                 }
 
-                if (this.isEditMode) {
-                    this.viewFields.classList.add('hidden');
-                    this.editFields.classList.remove('hidden');
-                    this.editTitle.value = data.title;
-                    this.editDescription.value = data.description;
-                    this.editImage.value = '';
-                    this.editImagePreview.src = data.imageData || '';
-                    this.editImagePreview.classList.toggle('hidden', !data.imageData);
-                } else {
-                    this.viewFields.classList.remove('hidden');
-                    this.editFields.classList.add('hidden');
-                }
+                // Show the modal
                 this.markerModal.classList.add('open');
             },
 
             closeMarkerModal() {
                 this.markerModal.classList.remove('open');
-                setTimeout(() => {
-                    this.currentMarkerIdBeingEdited = null;
-                }, 300);
-            },
-
-            handleImageUpload(event) {
-                const file = event.target.files[0];
-                if (file && (file.type === 'image/jpeg' || file.type === 'image/png')) {
-                    if (file.size > 1048576) { // 1MB limit
-                        this.showConfirmModal("El archivo es muy grande. Usa imágenes de menos de 1MB.", () => {}, true);
-                        return;
-                    }
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        this.editImagePreview.src = e.target.result;
-                        this.editImagePreview.classList.remove('hidden');
-                    };
-                    reader.readAsDataURL(file);
-                } else if(file) {
-                    this.showConfirmModal("Por favor, selecciona un archivo JPG o PNG.", () => {}, true);
-                }
-            },
-            
-            saveChanges() {
-                const markerIndex = this.currentMarkers.findIndex(m => m.id === this.currentMarkerIdBeingEdited);
-                if (markerIndex !== -1) {
-                    this.currentMarkers[markerIndex].title = this.editTitle.value;
-                    this.currentMarkers[markerIndex].description = this.editDescription.value;
-                    if (this.editImagePreview.src && !this.editImagePreview.src.startsWith('https://placehold')) {
-                       this.currentMarkers[markerIndex].imageData = this.editImagePreview.src;
-                    }
-                    window.saveMarkers(this.currentMarkers);
-                    this.closeMarkerModal();
-                }
-            },
-
-            confirmDelete() {
-                this.showConfirmModal("¿Seguro que quieres eliminar este marcador?", () => {
-                    const markerIndex = this.currentMarkers.findIndex(m => m.id === this.currentMarkerIdBeingEdited);
-                    if (markerIndex !== -1) {
-                        this.currentMarkers.splice(markerIndex, 1);
-                        window.saveMarkers(this.currentMarkers);
-                        this.closeMarkerModal();
-                        this.closeConfirmModal();
-                    }
-                });
-            },
-
-            showConfirmModal(message, onConfirm, isAlert = false) {
-                this.confirmMessage.textContent = message;
-
-                if (isAlert) {
-                    this.confirmBtn.textContent = 'OK';
-                    this.cancelBtn.classList.add('hidden');
-                } else {
-                    this.confirmBtn.textContent = 'Sí, Eliminar';
-                    this.cancelBtn.classList.remove('hidden');
-                    this.cancelBtn.onclick = () => this.closeConfirmModal();
-                }
-
-                this.confirmBtn.onclick = () => {
-                    onConfirm();
-                    if(isAlert) this.closeConfirmModal();
-                };
-                
-                this.confirmModal.classList.add('open');
-            },
-
-            closeConfirmModal() {
-                this.confirmModal.classList.remove('open');
             }
         };
         
-        // Expose function needed by Firestore script
-        window.renderMarkers = () => window.App.renderMarkers();
-        // Initialize the app logic once the DOM is ready
+        // Initialize the app logic once the DOM is ready.
         document.addEventListener('DOMContentLoaded', () => window.App.init());
-
     </script>
 </body>
 </html>
